@@ -20,7 +20,11 @@ public class DOTweenAnimationHandler : MonoBehaviour
     public void PlayAnimation()
     {
         // Anima para aumentar o tamanho
-        transform.DOMove(new Vector3(-6, -3, -2), animationDuration);
-        transform.DORotate(new Vector3(0, 90, 0), 2f, RotateMode.FastBeyond360);
+        transform.DOScale(originalScale * scaleMultiplier, animationDuration)
+            .OnComplete(() =>
+            {
+                // Após terminar, volta ao tamanho original
+                transform.DOScale(originalScale, returnDuration);
+            });
     }
 }
