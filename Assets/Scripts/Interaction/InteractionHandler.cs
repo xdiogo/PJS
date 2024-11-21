@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 
+using UnityEngine;
+
 public class InteractionHandler : MonoBehaviour
 {
     public Interactor currentInteractor;
@@ -19,20 +21,31 @@ public class InteractionHandler : MonoBehaviour
     [Header("GameObject")]
     public GameObject player;
 
+    [Header("Point-and-Click")]
+    public bool pointAndClickMode = false;
+
     // Update is called once per frame
     void Update()
     {
-        CheckVision();
+        
+        
+            CheckVision();
+            CheckPress();
+            CheckExitPress();
+       
+        
+            
+        
+    }
 
-        CheckExitPress();
-        CheckPress();
-
+    private void FixedUpdate()
+    {
+        CheckMouseClick();
     }
 
     void CheckVision()
     {
         var mainCamera = Camera.main.transform;
-
 
         bool isHit = Physics.Raycast(mainCamera.position, mainCamera.forward, out rayHit, rayDistance, rayMask);
 
@@ -46,7 +59,6 @@ public class InteractionHandler : MonoBehaviour
 
         bool isInteractor = rayHit.collider.TryGetComponent<Interactor>(out Interactor interactor);
 
-
         if (!isInteractor)
         {
             currentInteractor = null;
@@ -56,7 +68,6 @@ public class InteractionHandler : MonoBehaviour
         currentInteractor = interactor;
     }
 
-
     void CheckPress()
     {
         if (!Input.GetKeyDown(KeyCode.E)) return;
@@ -64,22 +75,24 @@ public class InteractionHandler : MonoBehaviour
         if (currentInteractor == null) return;
 
         isInteracting = true;
+        pointAndClickMode = true;
+
         interactionCamera.Priority = 15;
         interactionCamera.Follow = currentInteractor.transform;
         interactionCamera.LookAt = currentInteractor.transform;
-        
-        if(player != null)
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        if (player != null)
         {
             player.SetActive(false);
         }
-
-
-        //interactionCamera.GetCinemachineComponent<CinemachineFollow>()
     }
 
-
     void CheckExitPress()
-    {
+    {   
+        
+
         if (!Input.GetKeyDown(KeyCode.Q)) return;
 
         if (currentInteractor == null) return;
@@ -87,12 +100,31 @@ public class InteractionHandler : MonoBehaviour
         if (!isInteracting) return;
 
         interactionCamera.Priority = -1;
-
         isInteracting = false;
+        pointAndClickMode = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         if (player != null)
         {
             player.SetActive(true);
         }
     }
+
+    void CheckMouseClick()
+    {
+        if (!Input.GetMouseButtonDown(0)) return;
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
+        {
+            DOTweenAnimationHandler dotweenHandler = hit.collider.GetComponentInParent<DOTweenAnimationHandler>();
+            if (dotweenHandler != null)
+            {
+                dotweenHandler.PlayAnimation();
+            }
+        }
+    }
 }
+
