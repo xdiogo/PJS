@@ -6,4 +6,6 @@ public class Interactor : MonoBehaviour
 {
     public Vector3 lookOffset;
 
+
+
 }
