@@ -27,21 +27,21 @@ public class InteractionHandler : MonoBehaviour
     [Header("Cinemachine Follow Offset")]
     public CinemachineFollow cinemachineFollow;
 
-    
+
 
 
     // Update is called once per frame
     void Update()
     {
-        
-        
-            CheckVision();
-            CheckPress();
-            CheckExitPress();
-       
-        
-            
-        
+
+
+        CheckVision();
+        CheckPress();
+        CheckExitPress();
+
+
+
+
     }
 
     private void FixedUpdate()
@@ -103,7 +103,7 @@ public class InteractionHandler : MonoBehaviour
         }
     }
 
-   public void CheckExitPress()
+    public void CheckExitPress()
     {
         if (!Input.GetKeyDown(KeyCode.Q)) return;
 
@@ -138,24 +138,29 @@ public class InteractionHandler : MonoBehaviour
         if (!Input.GetMouseButtonDown(0)) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.SphereCast(ray, sphereRad,  out RaycastHit hit, rayDistance))
+        if (Physics.SphereCast(ray, sphereRad, out RaycastHit hit, rayDistance))
         {
-            DOTweenAnimationHandler dotweenHandler = hit.collider.GetComponentInParent<DOTweenAnimationHandler>();
+            // Detecta o objeto clicado
+            var dotweenHandler = hit.collider.GetComponentInParent<DOTweenAnimationHandler>();
             if (dotweenHandler != null)
             {
-                if (!dotweenHandler.isScrewedOut)
+                // Verifica qual objeto foi clicado
+                if (hit.collider.CompareTag("Screw")) // Certifique-se de taguear o Screw como "Screw"
                 {
-                    // Executa o desaparafusar
-                    dotweenHandler.PlayAnimation();
+                    dotweenHandler.PlayScrewAnimation();
                 }
-                else
+                else if (hit.collider.CompareTag("Wallplate")) // Certifique-se de taguear a Wallplate como "Wallplate"
                 {
-                    // Volta à posição original
-                    dotweenHandler.ReturnToOriginalPosition();
+                    dotweenHandler.PlayWallplateAnimation();
                 }
             }
         }
     }
 
+    void ChangeToTargetCamera()
+    {
+        interactionCamera.Priority = 15; // Ajusta a prioridade da câmera
+        interactionCamera.Follow = null; // Ajusta o alvo da câmera, se necessário
+        interactionCamera.LookAt = null; // Ajusta para onde a câmera olha, se necessário
+    }
 }
-
