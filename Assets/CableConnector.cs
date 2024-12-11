@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -6,30 +7,30 @@ using UnityEngine;
 public class CableConnector : MonoBehaviour
 {
     public LayerMask layerMask = ~0;
-
     public GameObject placeHolder;
 
     public bool isDragging;
-
     public float distanceFactor = 0.7f;
 
-    private Cable cableDraggin;
-
+    private Cable cableDragging;
     private Vector3 defaultUp;
-    // Start is called before the first frame update
+
+    // Novo: Evento para avisar que todos os cabos estão conectados
+    public static Action OnAllCablesConnected;
+    private int totalCables = 3; // Número total de cabos
+    private int cablesConnected = 0;
+
     void Start()
     {
         isDragging = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
         ClickCable();
         ReleaseCable();
         UpdateCable();
     }
-
 
     void ClickCable()
     {
@@ -44,71 +45,69 @@ public class CableConnector : MonoBehaviour
 
         var cable = hit.collider.transform.parent.parent.GetComponent<Cable>();
 
-        if (cable.isConnected) return;
-
-        if (cable.type == Cable.Type.OUT) return;
+        if (cable.isConnected || cable.type == Cable.Type.OUT) return;
 
         isDragging = true;
-        cableDraggin = cable;
-        defaultUp = cableDraggin.transform.up;
+        cableDragging = cable;
+        defaultUp = cableDragging.transform.up;
     }
 
     void UpdateCable()
     {
-        if (!Input.GetMouseButton(0)) return;
-
-        if (!isDragging) return;
+        if (!isDragging || !Input.GetMouseButton(0)) return;
 
         var destination = GetMousePoint();
         placeHolder.transform.position = destination;
 
-        var distance = Vector3.Distance(destination, cableDraggin.transform.position);
-        cableDraggin.transform.localScale = new Vector3(1, distance * distanceFactor, 1);
+        var distance = Vector3.Distance(destination, cableDragging.transform.position);
+        cableDragging.transform.localScale = new Vector3(1, distance * distanceFactor, 1);
 
-        var direction = destination - cableDraggin.transform.position;
-
-        cableDraggin.transform.up = direction;
-
+        var direction = destination - cableDragging.transform.position;
+        cableDragging.transform.up = direction;
     }
+
     void ReleaseCable()
     {
         if (!Input.GetMouseButtonUp(0)) return;
 
-
         var destination = GetMousePoint();
-
         Collider[] colliders = Physics.OverlapBox(destination, Vector3.one * .5f, Quaternion.identity, layerMask);
 
-
-        foreach (Collider collider in colliders)
+        foreach (var collider in colliders)
         {
             if (!collider.CompareTag("Connector")) continue;
 
             Cable destinationCable = collider.transform.parent.parent.GetComponent<Cable>();
 
-            if(destinationCable == cableDraggin) continue;
+            if (destinationCable == cableDragging || !destinationCable.CanConnect(cableDragging)) continue;
 
-            if (!destinationCable.CanConnect(cableDraggin)) continue;
-
-            cableDraggin.isConnected = true;
+            cableDragging.isConnected = true;
             destinationCable.isConnected = true;
             isDragging = false;
 
+            cablesConnected++;
+            Debug.Log($"Cabos conectados: {cablesConnected}/{totalCables}");
+
+            // Verifica se todos os cabos estão conectados
+            if (cablesConnected == totalCables)
+            {
+                Debug.Log("Todos os cabos conectados!");
+                OnAllCablesConnected?.Invoke(); // Dispara o evento de todos conectados
+            }
             return;
         }
 
-
-        cableDraggin.transform.localScale = Vector3.one;
-        cableDraggin.transform.up = defaultUp;
-
+        // Resetar cabo se não conectar
+        cableDragging.transform.localScale = Vector3.one;
+        cableDragging.transform.up = defaultUp;
+        isDragging = false;
     }
 
     private Vector3 GetMousePoint()
     {
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         var point = ray.GetPoint(10);
-
-        return new Vector3(point.x, point.y, cableDraggin.transform.position.z);
+        return new Vector3(point.x, point.y, cableDragging.transform.position.z);
     }
 
     private void OnDrawGizmos()
@@ -119,5 +118,4 @@ public class CableConnector : MonoBehaviour
             Gizmos.DrawCube(destination, Vector3.one * .5f);
         }
     }
-
 }

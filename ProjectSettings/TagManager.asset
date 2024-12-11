@@ -8,6 +8,9 @@ TagManager:
   - Goal 2
   - Interactable
   - Connector
+  - Wallplate
+  - Screw
+  - Cable
   layers:
   - Default
   - TransparentFX

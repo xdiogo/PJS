@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Cinemachine;
+Ôªøusing Unity.Cinemachine;
 using UnityEngine;
-
 
 public class InteractionHandler : MonoBehaviour
 {
@@ -15,7 +12,7 @@ public class InteractionHandler : MonoBehaviour
     public float sphereRad = 0.1f;
 
     [Header("Camera")]
-    public CinemachineCamera interactionCamera;
+    public CinemachineVirtualCameraBase interactionCamera;
     public bool isInteracting;
 
     [Header("GameObject")]
@@ -27,21 +24,23 @@ public class InteractionHandler : MonoBehaviour
     [Header("Cinemachine Follow Offset")]
     public CinemachineFollow cinemachineFollow;
 
-    
+    private bool isTransitioning = false;
 
+    void Start()
+    {
+        if (interactionCamera == null)
+        {
+            Debug.LogError("Interaction Camera n√£o atribu√≠da!");
+        }
+    }
 
-    // Update is called once per frame
     void Update()
     {
-        
-        
-            CheckVision();
-            CheckPress();
-            CheckExitPress();
-       
-        
-            
-        
+        if (isTransitioning) return; // Pausa a l√≥gica de intera√ß√£o durante a transi√ß√£o
+
+        CheckVision();
+        CheckPress();
+        CheckExitPress();
     }
 
     private void FixedUpdate()
@@ -83,18 +82,15 @@ public class InteractionHandler : MonoBehaviour
         isInteracting = true;
         pointAndClickMode = true;
 
-        // Atualiza a prioridade e segue o objeto de interaÁ„o
         interactionCamera.Priority = 15;
         interactionCamera.Follow = currentInteractor.transform;
         interactionCamera.LookAt = currentInteractor.transform;
 
-        // Ajusta o Follow Offset da Cinemachine
         if (cinemachineFollow != null && currentInteractor != null)
         {
             cinemachineFollow.FollowOffset = currentInteractor.lookOffset;
         }
 
-        // Configura o cursor e desativa o jogador
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         if (player != null)
@@ -103,7 +99,7 @@ public class InteractionHandler : MonoBehaviour
         }
     }
 
-   public void CheckExitPress()
+    public void CheckExitPress()
     {
         if (!Input.GetKeyDown(KeyCode.Q)) return;
 
@@ -111,18 +107,15 @@ public class InteractionHandler : MonoBehaviour
 
         if (!isInteracting) return;
 
-        // Reseta a prioridade e desativa o modo de interaÁ„o
         interactionCamera.Priority = -1;
         isInteracting = false;
         pointAndClickMode = false;
 
-        // Reseta o Follow Offset da Cinemachine para um valor padr„o
         if (cinemachineFollow != null)
         {
-            cinemachineFollow.FollowOffset = Vector3.zero; // Altere para o valor padr„o que desejar
+            cinemachineFollow.FollowOffset = Vector3.zero;
         }
 
-        // Configura o cursor e ativa o jogador
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
@@ -132,30 +125,35 @@ public class InteractionHandler : MonoBehaviour
         }
     }
 
-
     void CheckMouseClick()
     {
         if (!Input.GetMouseButtonDown(0)) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.SphereCast(ray, sphereRad,  out RaycastHit hit, rayDistance))
+        if (Physics.SphereCast(ray, sphereRad, out RaycastHit hit, rayDistance))
         {
-            DOTweenAnimationHandler dotweenHandler = hit.collider.GetComponentInParent<DOTweenAnimationHandler>();
+            var dotweenHandler = hit.collider.GetComponentInParent<DOTweenAnimationHandler>();
             if (dotweenHandler != null)
             {
-                if (!dotweenHandler.isScrewedOut)
+                if (hit.collider.CompareTag("Screw"))
                 {
-                    // Executa o desaparafusar
-                    dotweenHandler.PlayAnimation();
+                    dotweenHandler.PlayScrewAnimation();
                 }
-                else
+                else if (hit.collider.CompareTag("Wallplate"))
                 {
-                    // Volta ‡ posiÁ„o original
-                    dotweenHandler.ReturnToOriginalPosition();
+                    dotweenHandler.PlayWallplateAnimation();
                 }
             }
         }
     }
 
-}
+    public void StartTransition()
+    {
+        isTransitioning = true;
+    }
 
+    public void EndTransition()
+    {
+        isTransitioning = false;
+    }
+}
