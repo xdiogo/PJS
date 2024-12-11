@@ -8,9 +8,10 @@ public class DOTweenAnimationHandler : MonoBehaviour
     [Header("Animation Settings")]
     public float screwAnimationDuration = 1.5f;
     public float wallplateAnimationDuration = 1.5f;
-    public float screwMoveDistance = 0.2f;
+    public float screwMoveDistance = 0.3f;
     public float wallplateMoveDistance = 0.3f;
     public Vector3 wallplateMoveDirection = Vector3.back;
+    public Vector3 screwMoveDirection = Vector3.back;
 
     [Header("Cinemachine Settings")]
     public CinemachineCamera targetCamera; // Câmera para transição
@@ -41,7 +42,7 @@ public class DOTweenAnimationHandler : MonoBehaviour
         if (isScrewRemoved) return;
         isScrewRemoved = true;
 
-        screwMesh.DOLocalMove(screwOriginalPosition + Vector3.left * screwMoveDistance, screwAnimationDuration)
+        screwMesh.DOLocalMove(screwOriginalPosition + screwMoveDirection * screwMoveDistance, screwAnimationDuration)
             .SetEase(Ease.InOutCubic)
             .OnComplete(() =>
             {
