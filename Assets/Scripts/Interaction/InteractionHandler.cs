@@ -40,7 +40,6 @@ public class InteractionHandler : MonoBehaviour
     {
         if (isTransitioning) return; // Pausa a lógica de interação durante a transição
 
-        CheckVision();
         CheckPress();
         CheckExitPress();
     }
@@ -77,7 +76,11 @@ public class InteractionHandler : MonoBehaviour
 
     public void CheckPress()
     {
+        if (currentInteractor != null) return;
+
         if (!Input.GetKeyDown(KeyCode.E)) return;
+
+        CheckVision();
 
         if (currentInteractor == null) return;
 
