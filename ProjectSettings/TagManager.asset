@@ -11,6 +11,7 @@ TagManager:
   - Wallplate
   - Screw
   - Cable
+  - Tomada
   layers:
   - Default
   - TransparentFX

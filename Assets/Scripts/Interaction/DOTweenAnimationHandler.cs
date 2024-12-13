@@ -1,4 +1,4 @@
-using DG.Tweening;
+Ôªøusing DG.Tweening;
 using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -14,7 +14,7 @@ public class DOTweenAnimationHandler : MonoBehaviour
     public Vector3 screwMoveDirection = Vector3.back;
 
     [Header("Cinemachine Settings")]
-    public CinemachineCamera targetCamera; // C‚mera para transiÁ„o
+    public CinemachineCamera targetCamera; // C√¢mera para transi√ß√£o
 
     private Transform screwMesh;
     private Vector3 screwOriginalPosition;
@@ -28,7 +28,7 @@ public class DOTweenAnimationHandler : MonoBehaviour
         screwMesh = transform.Find("Screw/ScrewMesh");
         if (screwMesh == null)
         {
-            Debug.LogError("ScrewMesh n„o encontrado! Certifique-se de que a hierarquia est· correta.");
+            Debug.LogError("ScrewMesh n√£o encontrado! Certifique-se de que a hierarquia est√° correta.");
             return;
         }
 
@@ -36,21 +36,26 @@ public class DOTweenAnimationHandler : MonoBehaviour
         wallplateOriginalPosition = transform.localPosition;
     }
 
-    // AnimaÁ„o do parafuso
+    // Anima√ß√£o do parafuso
     public void PlayScrewAnimation()
     {
         if (isScrewRemoved) return;
         isScrewRemoved = true;
 
-        screwMesh.DOLocalMove(screwOriginalPosition + screwMoveDirection * screwMoveDistance, screwAnimationDuration)
+        screwMesh.DOLocalRotate(new Vector3(360, 0, 0), screwAnimationDuration, RotateMode.FastBeyond360)
+        .SetEase(Ease.Linear)
+        .SetLoops(-1, LoopType.Incremental);
+
+        screwMesh.DOLocalMove(screwOriginalPosition + Vector3.left * screwMoveDistance, screwAnimationDuration)
             .SetEase(Ease.InOutCubic)
             .OnComplete(() =>
             {
                 Debug.Log("Parafuso removido.");
+
             });
     }
 
-    // AnimaÁ„o da wallplate com fade e troca de c‚mera
+    // Anima√ß√£o da wallplate com fade e troca de c√¢mera
     public void PlayWallplateAnimation()
     {
         if (!isScrewRemoved)
@@ -70,6 +75,27 @@ public class DOTweenAnimationHandler : MonoBehaviour
                 StartCoroutine(SwitchCameraWithFade());
             });
     }
+    public void ReturnToOriginalPositions()
+    {
+        // Restaurar a posi√ß√£o do parafuso
+        if (isScrewRemoved)
+        {
+            screwMesh.DOKill();
+            screwMesh.DOLocalMove(screwOriginalPosition, screwAnimationDuration)
+                .SetEase(Ease.InOutCubic);
+            screwMesh.DOLocalRotate(Vector3.zero, screwAnimationDuration, RotateMode.FastBeyond360)
+                .SetEase(Ease.InOutCubic);
+            isScrewRemoved = false;
+        }
+
+        // Restaurar a posi√ß√£o da wallplate
+        if (isWallplateRemoved)
+        {
+            transform.DOLocalMove(wallplateOriginalPosition, wallplateAnimationDuration)
+                .SetEase(Ease.InOutCubic);
+            isWallplateRemoved = false;
+        }
+    }
 
     private IEnumerator SwitchCameraWithFade()
     {
@@ -80,7 +106,7 @@ public class DOTweenAnimationHandler : MonoBehaviour
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
-        // Troca para a c‚mera alvo tempor·ria
+        // Troca para a c√¢mera alvo tempor√°ria
         CameraManager.current.FocusOnCamera(targetCamera);
 
         // Fade In
@@ -89,18 +115,18 @@ public class DOTweenAnimationHandler : MonoBehaviour
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
-        //// Pausa antes de retornar ‡ interactionCamera (opcional)
+        //// Pausa antes de retornar √† interactionCamera (opcional)
         //yield return new WaitForSeconds(10f);
 
-        // Fade Out para voltar ‡ c‚mera de interaÁ„o
+        // Fade Out para voltar √† c√¢mera de intera√ß√£o
 
-        // Voltar para a c‚mera de interaÁ„o
+        // Voltar para a c√¢mera de intera√ß√£o
 
         // Fade In
         Debug.Log("FAde in");
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
-
+        ReturnToOriginalPositions();
         if (interactionHandler != null) interactionHandler.EndTransition();
     }
     void OnEnable()
@@ -120,14 +146,14 @@ public class DOTweenAnimationHandler : MonoBehaviour
 
     private IEnumerator ExecuteFadeTransition()
     {
-        // Exemplo: Fade Out, troca de c‚mera e Fade In
-        Debug.Log("Iniciando transiÁ„o de fade apÛs todos os cabos estarem conectados.");
+        // Exemplo: Fade Out, troca de c√¢mera e Fade In
+        Debug.Log("Iniciando transi√ß√£o de fade ap√≥s todos os cabos estarem conectados.");
 
         // Fade Out
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
-        // Aqui vocÍ pode adicionar lÛgica de troca de c‚mera, se necess·rio
+        // Aqui voc√™ pode adicionar l√≥gica de troca de c√¢mera, se necess√°rio
         CameraManager.current.UnfocusCamera(targetCamera);
 
 
@@ -135,6 +161,6 @@ public class DOTweenAnimationHandler : MonoBehaviour
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
 
-        Debug.Log("TransiÁ„o de fade concluÌda.");
+        Debug.Log("Transi√ß√£o de fade conclu√≠da.");
     }
 }

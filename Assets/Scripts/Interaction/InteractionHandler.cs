@@ -23,6 +23,8 @@ public class InteractionHandler : MonoBehaviour
 
     [Header("Cinemachine Follow Offset")]
     public CinemachineFollow cinemachineFollow;
+    public CinemachineVirtualCameraBase playerCamera;
+    
 
     private bool isTransitioning = false;
 
@@ -107,7 +109,18 @@ public class InteractionHandler : MonoBehaviour
 
         if (!isInteracting) return;
 
+        // Mudar a prioridade da câmera de interação para um valor baixo
         interactionCamera.Priority = -1;
+
+        // Restaurar a prioridade da câmera do jogador (assegure-se de que a variável playerCamera está atribuída)
+        if (playerCamera != null)
+        {
+            playerCamera.Priority = 10;  // Defina a prioridade da câmera do jogador (ajuste conforme necessário)
+            playerCamera.Follow = player.transform;  // Garante que a câmera do jogador volte a seguir o player
+            playerCamera.LookAt = player.transform;  // Garante que a câmera do jogador olhe para o player
+        }
+
+        // Reiniciar o estado de interação
         isInteracting = false;
         pointAndClickMode = false;
 
@@ -142,7 +155,9 @@ public class InteractionHandler : MonoBehaviour
                 else if (hit.collider.CompareTag("Wallplate"))
                 {
                     dotweenHandler.PlayWallplateAnimation();
+                    
                 }
+
             }
         }
     }
@@ -154,6 +169,8 @@ public class InteractionHandler : MonoBehaviour
 
     public void EndTransition()
     {
+   
         isTransitioning = false;
+
     }
 }
