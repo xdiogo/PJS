@@ -1,23 +1,44 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    [Header("--------- Audio Source ----------")]
-    [SerializeField] AudioSource musicSource;
-    [SerializeField] AudioSource SFXSource;
+    public static AudioManager current;
+    public AudioSource audioSource; // Fonte de áudio principal
 
-    [Header("--------- Audio Clip ----------")]
-    public AudioClip background;
-    public AudioClip Porta;
-    public AudioClip LoadingMusic;
-    public AudioClip Fogueira;
-    public AudioClip MouseClick;
-    public AudioClip PassosForaCasa;
 
-    public void Start()
+    private void Awake()
     {
-        musicSource.clip = background;
-        musicSource.Play();
+        current = this;
+        audioSource = GetComponent<AudioSource>();
     }
 
+}
+
+
+[Serializable]
+public class Sound
+{
+    public AudioClip audioClip;
+
+    [Range(0f, 1f)]
+    public float volume = 1f;
+}
+
+
+public static class SoundUtils
+{
+    public static void PlayShot(this AudioSource source, Sound sound)
+    {
+        source.PlayOneShot(sound.audioClip, sound.volume);
+    }
+
+    public static void PlayRandomShot(this AudioSource source, Sound[] sounds)
+    {
+        var sound = sounds[UnityEngine.Random.Range(0, sounds.Length)];
+        source.PlayOneShot(sound.audioClip, sound.volume);
+    }
 }

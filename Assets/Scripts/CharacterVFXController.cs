@@ -18,7 +18,7 @@ public class CharacterVFXController : MonoBehaviour
     public VisualEffect knockVfx;
     int aliveVar;
 
-    [Header("Hit")]
+    [Header("Hit")] 
     public VisualEffect hitVfx;
     int hitVar, hitEvent;
 

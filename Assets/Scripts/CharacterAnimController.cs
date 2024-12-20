@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CharacterAnimController : MonoBehaviour
 {
+    public PlayerSoundController soundController;
+
     public CharacterMovController movController;
     public PlayerInputHandler playerInputHandler;
 
@@ -81,4 +83,9 @@ public class CharacterAnimController : MonoBehaviour
         animator.SetTrigger("Recover");
     }
 
+
+    public void FootStepMade()
+    {
+        soundController.PlayStep();
+    }
 }

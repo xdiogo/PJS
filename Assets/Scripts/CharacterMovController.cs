@@ -9,6 +9,9 @@ public class CharacterMovController : MonoBehaviour
     public PlayerInputHandler inputHandler;
     public Rigidbody rb;
 
+    // Referência ao AudioManager
+    public AudioManager audioManager;
+
     [Header("Float")]
     [Range(0, 2)]
     public float floatHeight = 1.6f;
@@ -55,6 +58,9 @@ public class CharacterMovController : MonoBehaviour
 
     private bool isMovementFrozen = false; // New boolean to track if movement is frozen
     private UEventHandler eventHandler = new UEventHandler();
+
+    // Controle do tempo entre passos
+    private float lastStepTime = 0f;
 
     private void Awake()
     {
@@ -163,30 +169,31 @@ public class CharacterMovController : MonoBehaviour
 
     private void Move()
     {
-        // Initial validations
         if ((!moveOnAir && !isGrounded) || isFrozen || isMovementFrozen) return; // Add isMovementFrozen check
 
-        // Get input direction and transform it to the camera orientation
         Vector2 move = inputHandler.input_move.value;
         Vector3 transformedMove = inputHandler.playerCamera.transform.TransformDirection(new Vector3(move.x, 0, move.y));
         transformedMove.y = 0;
 
-        // If input is zero goal velocity should be zero too
-        float calculatedGoalVelocity = move.magnitude > 0.1f ? goalVelocity : 0;
+        // Se o jogador se mover e o tempo de intervalo entre passos for suficiente
+        //if (transformedMove.magnitude > 0.1f && Time.time - lastStepTime > audioManager.stepInterval)
+        //{
+        //    audioManager.PlayFootstepSound(); // Toca o som dos passos
+        //    lastStepTime = Time.time; // Atualiza o tempo do último passo
+        //}
 
-        // Calculate necessary acceleration to achieve goal velocity
+        // Movimento e física
+        float calculatedGoalVelocity = move.magnitude > 0.1f ? goalVelocity : 0;
         Vector3 acceleration = (transformedMove * calculatedGoalVelocity - rb.velocity) / Time.fixedDeltaTime;
 
-        // Check if new direction is facing or against current velocity
         float dot = Vector3.Dot(transformedMove, rb.velocity);
 
         if (dot >= 0 && calculatedGoalVelocity > 0)
-            acceleration = Vector3.ClampMagnitude(acceleration, maxAccel); // If positive or zero apply acceleration clamp
+            acceleration = Vector3.ClampMagnitude(acceleration, maxAccel);
         else
-            acceleration = Vector3.ClampMagnitude(acceleration, maxDeccel); // If negative apply deceleration clamp
+            acceleration = Vector3.ClampMagnitude(acceleration, maxDeccel);
 
         Vector3 force = rb.mass * acceleration;
-        // Make sure Move Force does apply to Y axis
         force.y = 0;
 
         rb.AddForce(force);
