@@ -14,7 +14,7 @@ public class DOTweenAnimationHandler : MonoBehaviour
     public Vector3 screwMoveDirection = Vector3.back;
 
     [Header("Cinemachine Settings")]
-    public CinemachineCamera targetCamera; // Câmera para transição
+    public CinemachineCamera targetCamera;
 
     private Transform screwMesh;
     private Vector3 screwOriginalPosition;
@@ -22,6 +22,8 @@ public class DOTweenAnimationHandler : MonoBehaviour
 
     public bool isScrewRemoved = false;
     public bool isWallplateRemoved = false;
+
+    private bool hasFaded = false;
 
     void Start()
     {
@@ -36,7 +38,6 @@ public class DOTweenAnimationHandler : MonoBehaviour
         wallplateOriginalPosition = transform.localPosition;
     }
 
-    // Animação do parafuso
     public void PlayScrewAnimation()
     {
         if (isScrewRemoved) return;
@@ -51,11 +52,9 @@ public class DOTweenAnimationHandler : MonoBehaviour
             .OnComplete(() =>
             {
                 Debug.Log("Parafuso removido.");
-
             });
     }
 
-    // Animação da wallplate com fade e troca de câmera
     public void PlayWallplateAnimation()
     {
         if (!isScrewRemoved)
@@ -72,63 +71,49 @@ public class DOTweenAnimationHandler : MonoBehaviour
             .OnComplete(() =>
             {
                 Debug.Log("Wallplate removida.");
-                StartCoroutine(SwitchCameraWithFade());
+                if (!hasFaded) StartCoroutine(SwitchCameraWithFade());
             });
     }
+
     public void ReturnToOriginalPositions()
     {
-        // Restaurar a posição do parafuso
         if (isScrewRemoved)
         {
             screwMesh.DOKill();
-            screwMesh.DOLocalMove(screwOriginalPosition, screwAnimationDuration)
-                .SetEase(Ease.InOutCubic);
-            screwMesh.DOLocalRotate(Vector3.zero, screwAnimationDuration, RotateMode.FastBeyond360)
-                .SetEase(Ease.InOutCubic);
+            screwMesh.DOLocalMove(screwOriginalPosition, screwAnimationDuration).SetEase(Ease.InOutCubic);
+            screwMesh.DOLocalRotate(Vector3.zero, screwAnimationDuration, RotateMode.FastBeyond360).SetEase(Ease.InOutCubic);
             isScrewRemoved = false;
         }
 
-        // Restaurar a posição da wallplate
         if (isWallplateRemoved)
         {
-            transform.DOLocalMove(wallplateOriginalPosition, wallplateAnimationDuration)
-                .SetEase(Ease.InOutCubic);
+            transform.DOLocalMove(wallplateOriginalPosition, wallplateAnimationDuration).SetEase(Ease.InOutCubic);
             isWallplateRemoved = false;
         }
     }
 
     private IEnumerator SwitchCameraWithFade()
     {
+        if (hasFaded) yield break;
+        hasFaded = true;
+
         var interactionHandler = FindObjectOfType<InteractionHandler>();
         if (interactionHandler != null) interactionHandler.StartTransition();
 
-        // Fade Out
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
-        // Troca para a câmera alvo temporária
         CameraManager.current.FocusOnCamera(targetCamera);
 
-        // Fade In
-
-        Debug.Log("FAde out");
-        PostProcessManager.current.FadeOut();
-        yield return new WaitForSeconds(1.1f);
-
-        //// Pausa antes de retornar à interactionCamera (opcional)
-        //yield return new WaitForSeconds(10f);
-
-        // Fade Out para voltar à câmera de interação
-
-        // Voltar para a câmera de interação
-
-        // Fade In
-        Debug.Log("FAde in");
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
+
         ReturnToOriginalPositions();
         if (interactionHandler != null) interactionHandler.EndTransition();
+
+        hasFaded = false;
     }
+
     void OnEnable()
     {
         CableConnector.OnAllCablesConnected += HandleAllCablesConnected;
@@ -141,23 +126,18 @@ public class DOTweenAnimationHandler : MonoBehaviour
 
     private void HandleAllCablesConnected()
     {
-        StartCoroutine(ExecuteFadeTransition());
+        if (!hasFaded) StartCoroutine(ExecuteFadeTransition());
     }
 
     private IEnumerator ExecuteFadeTransition()
     {
-        // Exemplo: Fade Out, troca de câmera e Fade In
         Debug.Log("Iniciando transição de fade após todos os cabos estarem conectados.");
 
-        // Fade Out
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
-        // Aqui você pode adicionar lógica de troca de câmera, se necessário
         CameraManager.current.UnfocusCamera(targetCamera);
 
-
-        // Fade In
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
 

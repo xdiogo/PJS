@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class InteractionHandler : MonoBehaviour
 {
-    public Interactor currentInteractor;
-
     [Header("Raycast")]
     public float rayDistance = 6f;
     public LayerMask rayMask = 1;
@@ -13,19 +11,18 @@ public class InteractionHandler : MonoBehaviour
 
     [Header("Camera")]
     public CinemachineVirtualCameraBase interactionCamera;
+    public CinemachineVirtualCameraBase playerCamera;
+    public CinemachineFollow cinemachineFollow;
     public bool isInteracting;
 
     [Header("GameObject")]
     public GameObject player;
+    public GameObject Head;
 
     [Header("Point-and-Click")]
     public bool pointAndClickMode = false;
 
-    [Header("Cinemachine Follow Offset")]
-    public CinemachineFollow cinemachineFollow;
-    public CinemachineVirtualCameraBase playerCamera;
-    
-
+    private Interactor currentInteractor;
     private bool isTransitioning = false;
 
     void Start()
@@ -38,8 +35,8 @@ public class InteractionHandler : MonoBehaviour
 
     void Update()
     {
-        if (isTransitioning) return; // Pausa a lógica de interação durante a transição
-
+        if (isTransitioning) return;
+        CheckVision();
         CheckPress();
         CheckExitPress();
     }
@@ -52,37 +49,22 @@ public class InteractionHandler : MonoBehaviour
     void CheckVision()
     {
         var mainCamera = Camera.main.transform;
-
         bool isHit = Physics.Raycast(mainCamera.position, mainCamera.forward, out rayHit, rayDistance, rayMask);
-
         Debug.DrawLine(mainCamera.position, mainCamera.position + mainCamera.forward * rayDistance, isHit ? Color.red : Color.cyan);
 
-        if (!isHit)
+        if (isHit && rayHit.collider.TryGetComponent(out Interactor interactor))
+        {
+            currentInteractor = interactor;
+        }
+        else
         {
             currentInteractor = null;
-            return;
         }
-
-        bool isInteractor = rayHit.collider.TryGetComponent<Interactor>(out Interactor interactor);
-
-        if (!isInteractor)
-        {
-            currentInteractor = null;
-            return;
-        }
-
-        currentInteractor = interactor;
     }
 
     public void CheckPress()
     {
-        if (currentInteractor != null) return;
-
-        if (!Input.GetKeyDown(KeyCode.E)) return;
-
-        CheckVision();
-
-        if (currentInteractor == null) return;
+        if (currentInteractor == null || !Input.GetKeyDown(KeyCode.E)) return;
 
         isInteracting = true;
         pointAndClickMode = true;
@@ -91,39 +73,29 @@ public class InteractionHandler : MonoBehaviour
         interactionCamera.Follow = currentInteractor.transform;
         interactionCamera.LookAt = currentInteractor.transform;
 
-        if (cinemachineFollow != null && currentInteractor != null)
+        if (cinemachineFollow != null)
         {
             cinemachineFollow.FollowOffset = currentInteractor.lookOffset;
         }
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        if (player != null)
-        {
-            player.SetActive(false);
-        }
+        player?.SetActive(false);
     }
 
     public void CheckExitPress()
     {
-        if (!Input.GetKeyDown(KeyCode.Q)) return;
+        if (!Input.GetKeyDown(KeyCode.Q) || !isInteracting) return;
 
-        if (currentInteractor == null) return;
-
-        if (!isInteracting) return;
-
-        // Mudar a prioridade da câmera de interação para um valor baixo
         interactionCamera.Priority = -1;
 
-        // Restaurar a prioridade da câmera do jogador (assegure-se de que a variável playerCamera está atribuída)
         if (playerCamera != null)
         {
-            playerCamera.Priority = 10;  // Defina a prioridade da câmera do jogador (ajuste conforme necessário)
-            playerCamera.Follow = player.transform;  // Garante que a câmera do jogador volte a seguir o player
-            playerCamera.LookAt = player.transform;  // Garante que a câmera do jogador olhe para o player
+            playerCamera.Priority = 10;
+            playerCamera.Follow = Head.transform;
+            playerCamera.LookAt = Head.transform;
         }
 
-        // Reiniciar o estado de interação
         isInteracting = false;
         pointAndClickMode = false;
 
@@ -134,11 +106,8 @@ public class InteractionHandler : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        if (player != null)
-        {
-            player.SetActive(true);
-        }
+        player?.SetActive(true);
+        currentInteractor = null;
     }
 
     void CheckMouseClick()
@@ -158,22 +127,11 @@ public class InteractionHandler : MonoBehaviour
                 else if (hit.collider.CompareTag("Wallplate"))
                 {
                     dotweenHandler.PlayWallplateAnimation();
-                    
                 }
-
             }
         }
     }
 
-    public void StartTransition()
-    {
-        isTransitioning = true;
-    }
-
-    public void EndTransition()
-    {
-   
-        isTransitioning = false;
-
-    }
+    public void StartTransition() => isTransitioning = true;
+    public void EndTransition() => isTransitioning = false;
 }

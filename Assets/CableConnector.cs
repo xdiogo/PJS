@@ -6,107 +6,134 @@ using UnityEngine;
 
 public class CableConnector : MonoBehaviour
 {
+    public static CableConnector Instance;
+
+    [Header("Settings")]
     public LayerMask layerMask = ~0;
     public GameObject placeHolder;
-
-    public bool isDragging;
     public float distanceFactor = 0.7f;
+    public int totalCables = 3;
 
     private Cable cableDragging;
     private Vector3 defaultUp;
-
-    // Novo: Evento para avisar que todos os cabos estão conectados
-    public static Action OnAllCablesConnected;
-    private int totalCables = 3; // Número total de cabos
+    private bool isDragging;
     private int cablesConnected = 0;
 
-    void Start()
+    // Evento para avisar que todos os cabos estão conectados
+    public static Action OnAllCablesConnected;
+
+    void Awake()
     {
-        isDragging = false;
+        // Garante uma única instância
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Update()
     {
-        ClickCable();
-        ReleaseCable();
-        UpdateCable();
+        HandleCableInteraction();
     }
 
-    void ClickCable()
+    void HandleCableInteraction()
     {
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (Input.GetMouseButtonDown(0))
+        {
+            TryPickCable();
+        }
+        else if (Input.GetMouseButton(0) && isDragging)
+        {
+            DragCable();
+        }
+        else if (Input.GetMouseButtonUp(0) && isDragging)
+        {
+            ReleaseCable();
+        }
+    }
 
+    void TryPickCable()
+    {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        var hasHit = Physics.Raycast(ray, out RaycastHit hit, 25, layerMask, QueryTriggerInteraction.Collide);
-
-        if (!hasHit) return;
-
-        if (!hit.collider.CompareTag("Connector")) return;
-
-        var cable = hit.collider.transform.parent.parent.GetComponent<Cable>();
-
-        if (cable.isConnected || cable.type == Cable.Type.OUT) return;
-
-        isDragging = true;
-        cableDragging = cable;
-        defaultUp = cableDragging.transform.up;
+        if (Physics.Raycast(ray, out RaycastHit hit, 25, layerMask, QueryTriggerInteraction.Collide))
+        {
+            if (hit.collider.CompareTag("Connector"))
+            {
+                Cable cable = hit.collider.transform.parent.parent.GetComponent<Cable>();
+                if (!cable.isConnected && cable.type != Cable.Type.OUT)
+                {
+                    cableDragging = cable;
+                    defaultUp = cableDragging.transform.up;
+                    isDragging = true;
+                }
+            }
+        }
     }
 
-    void UpdateCable()
+    void DragCable()
     {
-        if (!isDragging || !Input.GetMouseButton(0)) return;
-
-        var destination = GetMousePoint();
+        Vector3 destination = GetMousePoint();
         placeHolder.transform.position = destination;
 
-        var distance = Vector3.Distance(destination, cableDragging.transform.position);
+        float distance = Vector3.Distance(destination, cableDragging.transform.position);
         cableDragging.transform.localScale = new Vector3(1, distance * distanceFactor, 1);
 
-        var direction = destination - cableDragging.transform.position;
+        Vector3 direction = destination - cableDragging.transform.position;
         cableDragging.transform.up = direction;
     }
 
     void ReleaseCable()
     {
-        if (!Input.GetMouseButtonUp(0)) return;
-
-        var destination = GetMousePoint();
-        Collider[] colliders = Physics.OverlapBox(destination, Vector3.one * .5f, Quaternion.identity, layerMask);
+        Vector3 destination = GetMousePoint();
+        Collider[] colliders = Physics.OverlapBox(destination, Vector3.one * 0.5f, Quaternion.identity, layerMask);
 
         foreach (var collider in colliders)
         {
-            if (!collider.CompareTag("Connector")) continue;
-
-            Cable destinationCable = collider.transform.parent.parent.GetComponent<Cable>();
-
-            if (destinationCable == cableDragging || !destinationCable.CanConnect(cableDragging)) continue;
-
-            cableDragging.isConnected = true;
-            destinationCable.isConnected = true;
-            isDragging = false;
-
-            cablesConnected++;
-            Debug.Log($"Cabos conectados: {cablesConnected}/{totalCables}");
-
-            // Verifica se todos os cabos estão conectados
-            if (cablesConnected == totalCables)
+            if (collider.CompareTag("Connector"))
             {
-                Debug.Log("Todos os cabos conectados!");
-                OnAllCablesConnected?.Invoke(); // Dispara o evento de todos conectados
+                Cable targetCable = collider.transform.parent.parent.GetComponent<Cable>();
+                if (targetCable != cableDragging && targetCable.CanConnect(cableDragging))
+                {
+                    ConnectCables(targetCable);
+                    return;
+                }
             }
-            return;
         }
 
-        // Resetar cabo se não conectar
+        ResetCable();
+    }
+
+    void ConnectCables(Cable targetCable)
+    {
+        cableDragging.isConnected = true;
+        targetCable.isConnected = true;
+        isDragging = false;
+
+        cablesConnected++;
+        Debug.Log($"Cabos conectados: {cablesConnected}/{totalCables}");
+
+        if (cablesConnected >= totalCables)
+        {
+            Debug.Log("Todos os cabos conectados!");
+            OnAllCablesConnected?.Invoke();
+        }
+    }
+
+    void ResetCable()
+    {
         cableDragging.transform.localScale = Vector3.one;
         cableDragging.transform.up = defaultUp;
         isDragging = false;
     }
 
-    private Vector3 GetMousePoint()
+    Vector3 GetMousePoint()
     {
-        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        var point = ray.GetPoint(10);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Vector3 point = ray.GetPoint(10);
         return new Vector3(point.x, point.y, cableDragging.transform.position.z);
     }
 
@@ -114,8 +141,8 @@ public class CableConnector : MonoBehaviour
     {
         if (isDragging)
         {
-            var destination = GetMousePoint();
-            Gizmos.DrawCube(destination, Vector3.one * .5f);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawCube(GetMousePoint(), Vector3.one * 0.5f);
         }
     }
 }
