@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CableConnector : MonoBehaviour
 {
@@ -20,7 +21,8 @@ public class CableConnector : MonoBehaviour
     private int cablesConnected = 0;
 
     // Evento para avisar que todos os cabos estão conectados
-    public static Action OnAllCablesConnected;
+    public Action OnAllCablesConnected;
+    public UnityEvent thingsToDoAfter;
 
     void Awake()
     {
@@ -119,6 +121,9 @@ public class CableConnector : MonoBehaviour
         if (cablesConnected >= totalCables)
         {
             Debug.Log("Todos os cabos conectados!");
+
+            thingsToDoAfter.Invoke();
+
             OnAllCablesConnected?.Invoke();
         }
     }

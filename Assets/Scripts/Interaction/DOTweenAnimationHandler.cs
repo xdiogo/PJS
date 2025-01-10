@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class DOTweenAnimationHandler : MonoBehaviour
 {
+    public CableConnector connector;
+
     [Header("Animation Settings")]
     public float screwAnimationDuration = 1.5f;
     public float wallplateAnimationDuration = 1.5f;
@@ -116,12 +118,12 @@ public class DOTweenAnimationHandler : MonoBehaviour
 
     void OnEnable()
     {
-        CableConnector.OnAllCablesConnected += HandleAllCablesConnected;
+        connector.OnAllCablesConnected += HandleAllCablesConnected;
     }
 
     void OnDisable()
     {
-        CableConnector.OnAllCablesConnected -= HandleAllCablesConnected;
+        connector.OnAllCablesConnected -= HandleAllCablesConnected;
     }
 
     private void HandleAllCablesConnected()
