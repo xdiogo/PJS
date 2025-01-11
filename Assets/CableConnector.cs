@@ -7,7 +7,7 @@ using UnityEngine.Events;
 
 public class CableConnector : MonoBehaviour
 {
-    public static CableConnector Instance;
+    private Dictionary<GameObject, int> cablesPerSocket = new Dictionary<GameObject, int>();
 
     [Header("Settings")]
     public LayerMask layerMask = ~0;
@@ -22,24 +22,15 @@ public class CableConnector : MonoBehaviour
 
     // Evento para avisar que todos os cabos estão conectados
     public Action OnAllCablesConnected;
+    public Action OnCancel;
     public UnityEvent thingsToDoAfter;
-
-    void Awake()
-    {
-        // Garante uma única instância
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
     void Update()
     {
         HandleCableInteraction();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnCancel.Invoke();
+        }
     }
 
     void HandleCableInteraction()
@@ -105,8 +96,6 @@ public class CableConnector : MonoBehaviour
                 }
             }
         }
-
-        ResetCable();
     }
 
     void ConnectCables(Cable targetCable)
@@ -115,24 +104,24 @@ public class CableConnector : MonoBehaviour
         targetCable.isConnected = true;
         isDragging = false;
 
-        cablesConnected++;
-        Debug.Log($"Cabos conectados: {cablesConnected}/{totalCables}");
+        // Identificar a tomada (socket)
+        GameObject socket = targetCable.transform.parent.gameObject;
 
-        if (cablesConnected >= totalCables)
+        if (!cablesPerSocket.ContainsKey(socket))
         {
-            Debug.Log("Todos os cabos conectados!");
+            cablesPerSocket[socket] = 0;
+        }
 
+        cablesPerSocket[socket]++;
+        Debug.Log($"Cabos conectados na tomada {socket.name}: {cablesPerSocket[socket]}/{totalCables}");
+
+        // Verificar se todos os cabos dessa tomada estão conectados
+        if (cablesPerSocket[socket] >= totalCables)
+        {
+            Debug.Log($"Todos os cabos conectados na tomada {socket.name}!");
             thingsToDoAfter.Invoke();
-
             OnAllCablesConnected?.Invoke();
         }
-    }
-
-    void ResetCable()
-    {
-        cableDragging.transform.localScale = Vector3.one;
-        cableDragging.transform.up = defaultUp;
-        isDragging = false;
     }
 
     Vector3 GetMousePoint()

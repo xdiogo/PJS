@@ -55,10 +55,12 @@ public class InteractionHandler : MonoBehaviour
         if (isHit && rayHit.collider.TryGetComponent(out Interactor interactor))
         {
             currentInteractor = interactor;
+            CursorManager.current.SetcursorInteraction();
         }
         else
         {
             currentInteractor = null;
+            CursorManager.current.Setcursornone();
         }
     }
 

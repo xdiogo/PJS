@@ -98,14 +98,20 @@ public class DOTweenAnimationHandler : MonoBehaviour
     {
         if (hasFaded) yield break;
         hasFaded = true;
-
+        
         var interactionHandler = FindObjectOfType<InteractionHandler>();
         if (interactionHandler != null) interactionHandler.StartTransition();
 
         PostProcessManager.current.FadeOut();
+
+        connector.gameObject.SetActive(true);
+
         yield return new WaitForSeconds(1.1f);
 
+
         CameraManager.current.FocusOnCamera(targetCamera);
+
+       
 
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
@@ -119,11 +125,13 @@ public class DOTweenAnimationHandler : MonoBehaviour
     void OnEnable()
     {
         connector.OnAllCablesConnected += HandleAllCablesConnected;
+        connector.OnCancel += HandleAllCablesConnected;
     }
 
     void OnDisable()
     {
         connector.OnAllCablesConnected -= HandleAllCablesConnected;
+        connector.OnCancel -= HandleAllCablesConnected;
     }
 
     private void HandleAllCablesConnected()
@@ -134,15 +142,17 @@ public class DOTweenAnimationHandler : MonoBehaviour
     private IEnumerator ExecuteFadeTransition()
     {
         Debug.Log("Iniciando transição de fade após todos os cabos estarem conectados.");
-
+        connector.gameObject.SetActive(false);
         PostProcessManager.current.FadeOut();
         yield return new WaitForSeconds(1.1f);
 
         CameraManager.current.UnfocusCamera(targetCamera);
+        Debug.Log($"objeto {gameObject.name}  camera {targetCamera.name} ");
 
         PostProcessManager.current.FadeIn();
         yield return new WaitForSeconds(1.1f);
 
         Debug.Log("Transição de fade concluída.");
     }
+
 }
