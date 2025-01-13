@@ -4,33 +4,16 @@ public class ToggleUI : MonoBehaviour
 {
     public GameObject page1;
 
-    private bool isVisible = false;
-
-    void Start()
-    {
-        // Initially hide all UI elements
-        SetUIVisibility(false);
-    }
-
     void Update()
     {
-        // Check if the B key is pressed
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.M))
         {
-            // Toggle visibility
-            isVisible = !isVisible;
-            SetUIVisibility(isVisible);
+            page1.SetActive(!page1.activeSelf);
+
+            if (page1.activeSelf)
+                MouseLock.current.UnlockCursor();
+            else
+                MouseLock.current.LockCursor();
         }
-    }
-
-    private void SetUIVisibility(bool visibility)
-    {
-        if (visibility)
-            MouseLock.current.UnlockCursor();
-        else
-            MouseLock.current.LockCursor();
-
-
-        page1.SetActive(visibility);
     }
 }
