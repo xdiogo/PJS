@@ -12,50 +12,6 @@ public class DiaryController : MonoBehaviour
     public Button nextPageButton;
     public Button previousPageButton;
 
-    void Start()
-    {
-        // Initialize buttons and set their initial states
-        nextPageButton.onClick.AddListener(TurnNextPage);
-        previousPageButton.onClick.AddListener(TurnPreviousPage);
-        UpdateButtons(); // Set initial button states
-    }
-
-    void Update()
-    {
-        // Smooth page turning using Slerp
-        if (isTurning)
-        {
-            // Gradually rotate the current page to the target rotation
-            pages[currentPage].transform.rotation = Quaternion.Slerp(
-                pages[currentPage].transform.rotation,
-                targetRotation,
-                Time.deltaTime * pageSpeed
-            );
-
-            // Check if the page has reached the target rotation
-            if (Quaternion.Angle(pages[currentPage].transform.rotation, targetRotation) < 1.0f) // Tolerance increased for smoother interaction
-            {
-                // Snap to the exact target rotation
-                pages[currentPage].transform.rotation = targetRotation;
-                isTurning = false; // Indicate the page is no longer turning
-
-                // Update button states after the page has turned
-                UpdateButtons();
-            }
-        }
-    }
-
-    // Called when the "Next" button is pressed
-    void TurnNextPage()
-    {
-        Debug.Log("Next Page Button Pressed");
-        if (currentPage < pages.Length - 1 && !isTurning)
-        {
-            currentPage++;
-            targetRotation = Quaternion.Euler(0, 180, 0); // Target rotation for a turned page
-            isTurning = true; // Set turning state
-        }
-    }
 
     // Called when the "Previous" button is pressed
     void TurnPreviousPage()
