@@ -10,8 +10,6 @@ public class RoombaController : MonoBehaviour
 
     void Start()
     {
-        Vector3 currentRotation = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(currentRotation.x, currentRotation.y, 0f);
         agent = GetComponent<NavMeshAgent>();
         agent.isStopped = true;  // Inicialmente parado
     }
@@ -24,6 +22,7 @@ public class RoombaController : MonoBehaviour
         }
     }
 
+    [ContextMenu("Activate")]
     public void ActivateRoomba()
     {
         isActive = true;
