@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class DOTweenAnimationHandler : MonoBehaviour
 {
+    public RoombaController roomba;
     public CableConnector connector;
 
     [Header("Animation Settings")]
@@ -147,6 +148,9 @@ public class DOTweenAnimationHandler : MonoBehaviour
         yield return new WaitForSeconds(1.1f);  
 
         GetComponent<SocketRepairNotifier>()?.NotifySocketRepaired();
+
+        roomba.ActivateRoomba();
+
         CameraManager.current.UnfocusCamera(targetCamera);
         Debug.Log($"objeto {gameObject.name}  camera {targetCamera.name} ");
 
