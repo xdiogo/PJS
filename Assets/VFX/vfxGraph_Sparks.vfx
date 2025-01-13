@@ -57,10 +57,7 @@ MonoBehaviour:
       y: -236
       width: 476
       height: 1577
-    contents:
-    - model: {fileID: 0}
-      id: 0
-      isStickyNote: 0
+    contents: []
   - title: SMOKE
     position:
       serializedVersion: 2
@@ -80,37 +77,13 @@ MonoBehaviour:
     - model: {fileID: 8926484042661614930}
       id: 0
       isStickyNote: 0
-    - model: {fileID: 8926484042661614945}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614964}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614973}
-      id: 0
-      isStickyNote: 0
     - model: {fileID: 8926484042661614979}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614982}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614985}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614989}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614992}
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661614977}
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661614924}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614926}
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661614998}
@@ -127,34 +100,13 @@ MonoBehaviour:
     - model: {fileID: 8926484042661614757}
       id: 0
       isStickyNote: 0
-    - model: {fileID: 8926484042661614811}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614830}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614784}
-      id: 0
-      isStickyNote: 0
     - model: {fileID: 8926484042661614788}
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661614752}
       id: 0
       isStickyNote: 0
-    - model: {fileID: 8926484042661614802}
-      id: 0
-      isStickyNote: 0
     - model: {fileID: 8926484042661614790}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614793}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614839}
-      id: 0
-      isStickyNote: 0
-    - model: {fileID: 8926484042661614796}
       id: 0
       isStickyNote: 0
     - model: {fileID: 8926484042661614806}

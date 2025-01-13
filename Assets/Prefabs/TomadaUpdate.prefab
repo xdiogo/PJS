@@ -67,6 +67,7 @@ GameObject:
   - component: {fileID: 546914105966153745}
   - component: {fileID: 2982958447835373083}
   - component: {fileID: 6442717438455886212}
+  - component: {fileID: 4136778740863706460}
   - component: {fileID: 1605447157945020410}
   m_Layer: 3
   m_Name: Wallplate
@@ -177,6 +178,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookOffset: {x: 1, y: 0.4, z: 0}
+--- !u!114 &4136778740863706460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3519264674322396451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6c7328dd5f1e554baecd26a8a64c4e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1605447157945020410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -189,11 +202,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cc6eeeed527104fadcf741910070ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connector: {fileID: 0}
   screwAnimationDuration: 1.5
   wallplateAnimationDuration: 1.5
   screwMoveDistance: 0.2
   wallplateMoveDistance: 0.3
   wallplateMoveDirection: {x: 0, y: 0, z: 1}
+  screwMoveDirection: {x: 0, y: 0, z: -1}
   targetCamera: {fileID: 0}
   isScrewRemoved: 0
   isWallplateRemoved: 0

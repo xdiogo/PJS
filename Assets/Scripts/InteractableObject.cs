@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class InteractableObject : MonoBehaviour
 {
-    // Reference to the QuestSystem
-    public QuestSystem questSystem;
 
     // Interaction distance
     public float interactionRange = 3f;  // How close the player needs to be to interact with the cube
@@ -28,10 +26,6 @@ public class InteractableObject : MonoBehaviour
     // Handle interaction (completing the quest)
     void Interact()
     {
-        // If the QuestSystem is not null, complete the quest
-        if (questSystem != null)
-        {
-            questSystem.InteractWithQuestItem(); // Complete the quest
-        }
+       
     }
 }

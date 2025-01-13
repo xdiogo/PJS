@@ -144,8 +144,9 @@ public class DOTweenAnimationHandler : MonoBehaviour
         Debug.Log("Iniciando transição de fade após todos os cabos estarem conectados.");
         connector.gameObject.SetActive(false);
         PostProcessManager.current.FadeOut();
-        yield return new WaitForSeconds(1.1f);
+        yield return new WaitForSeconds(1.1f);  
 
+        GetComponent<SocketRepairNotifier>()?.NotifySocketRepaired();
         CameraManager.current.UnfocusCamera(targetCamera);
         Debug.Log($"objeto {gameObject.name}  camera {targetCamera.name} ");
 
