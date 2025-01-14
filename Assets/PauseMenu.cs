@@ -16,25 +16,15 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         continueButton.onClick.AddListener(Resume);
         quitButton.onClick.AddListener(QuitGame);
+        MouseLock.current.LockCursor();
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            pauseMenuUI.SetActive(!pauseMenuUI.activeSelf);
-
-            if (pauseMenuUI.activeSelf)
-                MouseLock.current.UnlockCursor();
-            else
-                MouseLock.current.LockCursor();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
             if (isPaused)
                 Resume();
-
             else
                 Pause();
         }
@@ -42,15 +32,16 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        
         pauseMenuUI.SetActive(false);
+        Time.timeScale = 1f;
         isPaused = false;
-        
+        MouseLock.current.LockCursor();
     }
 
     void Pause()
     {
         pauseMenuUI.SetActive(true);
+        Time.timeScale = 0f;
         isPaused = true;
         MouseLock.current.UnlockCursor();
     }

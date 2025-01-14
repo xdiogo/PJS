@@ -18,22 +18,13 @@ public class MouseLock : MonoBehaviour
         LockCursor(); // Lock the cursor by default
     }
 
-    void Update()
-    {
-        // Unlock the cursor when the user presses Escape
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            UnlockCursor();
-        }
-       
-    }
-
     // Lock the cursor and hide it
     public void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        aimInputController.enabled = true;  
+        if (aimInputController != null)
+            aimInputController.enabled = true;
     }
 
     // Unlock the cursor and make it visible
@@ -41,12 +32,8 @@ public class MouseLock : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        aimInputController.enabled = false;  
-    }
-
-    // Check if the pointer is over a UI element
-    bool IsPointerOverUI()
-    {
-        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+        if (aimInputController != null)
+            aimInputController.enabled = false;
     }
 }
+
